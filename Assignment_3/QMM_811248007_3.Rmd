@@ -1,0 +1,68 @@
+---
+title: "QMM_811248007_3"
+author: "Namrah"
+date: "2023-10-13"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+# Load the required R package for linear programming
+library("lpSolve")
+```
+
+```{r}
+# Define the transportation cost matrix
+cost_matrix <- matrix(c(
+  622, 614, 630, 0,
+  641, 645, 649, 0
+), nrow = 2, byrow = TRUE)
+
+# Define supply and demand constraints
+supply <- c(100, 120)  # Supply limits for Plant A and Plant B
+demand <- c(80, 60, 70, 10)  # Demand requirements for Warehouse 1, Warehouse 2, Warehouse 3, and the Dummy
+
+```
+
+```{r}
+
+# Check if the supply and demand constraints match the cost matrix dimensions
+if (length(supply) != nrow(cost_matrix) || length(demand) != ncol(cost_matrix)) {
+  stop("Mismatch between supply and demand constraints and the cost matrix dimensions.")
+}
+
+# Solve the transportation problem
+transport_solution <- lp.transport(cost = cost_matrix, direction = "min",
+                                   row.signs = rep(">=", length(supply)),
+                                   row.rhs = supply,
+                                   col.signs = rep("<=", length(demand)),
+                                   col.rhs = demand)
+
+# Extract the solution
+solution <- transport_solution$solution
+
+```
+
+```{r}
+
+# Print the results
+cat("Solution:\n")
+cat("Production at Plant A:", solution[1], "units\n")
+cat("Production at Plant B:", solution[2], "units\n")
+cat("AEDs shipped from Plant A to Warehouse 1:", solution[3], "units\n")
+cat("AEDs shipped from Plant A to Warehouse 2:", solution[4], "units\n")
+cat("AEDs shipped from Plant A to Warehouse 3:", solution[5], "units\n")
+cat("AEDs shipped from Plant B to Warehouse 1:", solution[6], "units\n")
+cat("AEDs shipped from Plant B to Warehouse 2:", solution[7], "units\n")
+cat("AEDs shipped from Plant B to Warehouse 3:", solution[8], "units\n")
+
+```
+
+```{r}
+
+# Print the total minimum cost
+cat("Optimal Cost:", transport_solution$objval, "\n")
+```
+
+
