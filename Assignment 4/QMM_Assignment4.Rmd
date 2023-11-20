@@ -1,0 +1,79 @@
+---
+title: "Integer Programming"
+author: "Namrah"
+date: "2023-11-28"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("lpSolveAPI")
+# Loading the LP file
+data <- read.lp("lin.lp")
+print(data)
+```
+
+```{r}
+# Defining the required workforce for each day
+workersNeededPerDay <- matrix(c("Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",
+                            18,27,22,26,25,21,19), ncol=2, byrow=FALSE)
+colnames(workersNeededPerDay) <- c("Day", "RequiredWorkers")
+as.table(workersNeededPerDay)
+
+```
+*AP's package handling team operates on a five-day work schedule with two consecutive days off. Their base salary stands at $750 per week. Those working on either Saturday or Sunday receive an additional $25 per day. The available shifts and respective compensations for package handlers are:*
+```{r}
+# Available shifts and corresponding salaries
+shiftsAndCompensation <- matrix(c(1,2,3,4,5,6,7,
+                             "Sunday and Monday","Monday and Tuesday","Tuesday and Wednesday",
+                             "Wednesday and Thursday","Thursday and Friday",
+                             "Friday and Saturday","Saturday and Sunday", "$775",
+                             "$800","$800","$800","$800","$775","$750"), ncol=3, byrow=FALSE)
+colnames(shiftsAndCompensation) <- c("Shift", "DaysOff", "Wage")
+as.table(shiftsAndCompensation)
+
+```
+
+```{r}
+# Solving the LP model
+solve(data)
+
+```
+*Valid models yield an outcome of 0.*
+
+```{r}
+# Objective Function - Total Cost
+totalCost <- get.objective(data)
+totalCost
+```
+*The total cost is $25,675, representing the overall expenses incurred by the company to ensure adequate staffing daily while minimizing labor expenses.*
+
+```{r}
+# Workforce availability per day - variable
+availableWorkers <- get.variables(data)
+availableWorkers
+```
+
+```{r}
+# Summary of available workers each day
+cat("Summary of Available Workers Each Day:\n")
+cat("Monday =", availableWorkers[3] + availableWorkers[4] + availableWorkers[5] + availableWorkers[6] + availableWorkers[7], "Workers\n")
+cat("Tuesday =", availableWorkers[4] + availableWorkers[5] + availableWorkers[6] + availableWorkers[7] + availableWorkers[1], "Workers\n")
+cat("Wednesday =", availableWorkers[5] + availableWorkers[6] + availableWorkers[7] + availableWorkers[1] + availableWorkers[2], "Workers\n")
+cat("Thursday =", availableWorkers[6] + availableWorkers[7] + availableWorkers[1] + availableWorkers[2] + availableWorkers[3], "Workers\n")
+cat("Friday =", availableWorkers[7] + availableWorkers[1] + availableWorkers[2] + availableWorkers[3] + availableWorkers[4], "Workers\n")
+cat("Saturday =", availableWorkers[1] + availableWorkers[2] + availableWorkers[3] + availableWorkers[4] + availableWorkers[5], "Workers\n")
+cat("Sunday =", availableWorkers[2] + availableWorkers[3] + availableWorkers[4] + availableWorkers[5] + availableWorkers[6], "Workers\n")
+
+```
+
+
+
+
+
+
